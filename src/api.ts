@@ -1,4 +1,5 @@
 import { getApiBase, getToken } from "./config.js";
+import { relogin } from "./auth.js";
 
 const RESULT_SUCCESS = "0000";
 const RESULT_TOKEN_EXPIRED = "0102";
@@ -14,19 +15,34 @@ function requireToken(): string {
 
 function handleResponse(data: any): any {
   const code = data.result ?? data.apiCode;
-  if (code === RESULT_TOKEN_EXPIRED) throw new AuthError("Token expired. Run: coros login");
+  if (code === RESULT_TOKEN_EXPIRED) throw new TokenExpiredError();
   if (code !== RESULT_SUCCESS && code != null) throw new ApiError(data.message ?? JSON.stringify(data));
   return data;
 }
+
+class TokenExpiredError extends Error {}
 
 async function request(method: string, path: string, params?: Record<string, string | number>): Promise<any> {
   const url = new URL(`${getApiBase()}${path}`);
   if (params) {
     for (const [k, v] of Object.entries(params)) url.searchParams.set(k, String(v));
   }
-  const resp = await fetch(url, { method, headers: { accesstoken: requireToken() } });
-  if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-  return handleResponse(await resp.json());
+
+  async function doRequest(token: string) {
+    const resp = await fetch(url, { method, headers: { accesstoken: token } });
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    return handleResponse(await resp.json());
+  }
+
+  try {
+    return await doRequest(requireToken());
+  } catch (e) {
+    if (e instanceof TokenExpiredError) {
+      const newToken = await relogin();
+      return await doRequest(newToken);
+    }
+    throw e;
+  }
 }
 
 export async function listActivities(page = 1, size = 20): Promise<any> {

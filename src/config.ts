@@ -14,6 +14,7 @@ export interface Config {
   access_token?: string;
   region?: string;
   email?: string;
+  pwd_hash?: string;
 }
 
 export function loadConfig(): Config {

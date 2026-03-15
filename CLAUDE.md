@@ -45,4 +45,4 @@ Returns `analyse.data.dayList[]` (daily ATI/CTI/RHR/fatigue), `dashboard.data.su
 
 ## Setup
 
-Requires authentication first: `coros login`. Token stored in `~/.config/coros-cli/config.json`.
+Requires authentication first: `coros login`. Credentials stored in `~/.config/coros-cli/config.json`. Sessions are refreshed automatically when the token expires.

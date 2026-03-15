@@ -24,7 +24,7 @@ Authenticate with your Coros account:
 coros login
 ```
 
-This stores a session token in `~/.config/coros-cli/config.json`. No password is saved. EU accounts are auto-detected.
+This stores your credentials in `~/.config/coros-cli/config.json`. Sessions are refreshed automatically — you only need to login once. EU accounts are auto-detected.
 
 ## Usage
 
@@ -134,13 +134,13 @@ coros-cli includes a built-in [MCP](https://modelcontextprotocol.io/) server, so
 
 ## How authentication works
 
-When you run `coros login`, your password is **never stored**. Here's what happens:
+When you run `coros login`:
 
-1. Your password is hashed locally before leaving your machine
+1. Your password is hashed (MD5) locally before leaving your machine
 2. The hash is sent to Coros's login endpoint to obtain a session token
-3. Only this token is saved in `~/.config/coros-cli/config.json`
+3. The token and password hash are saved in `~/.config/coros-cli/config.json`
 
-The token expires over time — when it does, just run `coros login` again. You can inspect or delete the config file at any time.
+Your plain-text password is **never stored**. When the session token expires, coros-cli automatically re-authenticates using the stored hash — no manual re-login needed. You can inspect or delete the config file at any time.
 
 ## Disclaimer
 
